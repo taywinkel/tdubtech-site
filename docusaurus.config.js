@@ -12,7 +12,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'TdubTech',
   tagline: 'Tutorials and projects from TdubTech',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/drakeDuck.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
