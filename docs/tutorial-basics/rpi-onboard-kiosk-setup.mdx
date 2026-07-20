@@ -1,0 +1,220 @@
+---
+sidebar_position: 4
+---
+
+
+# RPi4 + Raspbian Trixie Lite — Openbox / Onboard / Chromium Kiosk Setup
+
+Working baseline as of this build. Covers Onboard on-screen keyboard testing
+through to a full CODESYS WebVisu kiosk with overlay keyboard.
+
+---
+
+## 1. Base packages
+
+```bash
+sudo apt update
+sudo apt install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
+sudo apt install chromium onboard at-spi2-core -y
+sudo apt install unclutter libxml2-utils -y
+```
+
+Notes:
+- On Trixie the package is `chromium`, not `chromium-browser`.
+- `at-spi2-core` is required for Onboard's auto-show/hide — it watches focus
+  events over the AT-SPI accessibility bus.
+- `libxml2-utils` gives you `xmllint`, used below to validate `rc.xml` edits.
+- `unclutter` hides the mouse cursor when idle (optional, useful for kiosk).
+
+---
+
+## 2. Auto-login + auto-start X on boot
+
+```bash
+sudo raspi-config
+```
+System Options → Boot / Auto Login → **Console Autologin**.
+
+`~/.bash_profile`:
+```bash
+if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+  startx
+fi
+```
+
+---
+
+## 3. Openbox window rule (critical — this took several rounds to get right)
+
+`~/.config/openbox/rc.xml` **must** be a full copy of the stock config, not
+just an `<applications>` fragment — Openbox needs the complete
+`<openbox_config>` root with keyboard/mouse/theme sections. A file containing
+only `<applications>...</applications>` is valid XML but an incomplete
+config, and Openbox silently falls back to defaults, ignoring your rule.
+
+```bash
+cp /etc/xdg/openbox/rc.xml ~/.config/openbox/rc.xml
+```
+
+Find `class` from actual `WM_CLASS` (case-sensitive, use the **second**
+quoted value, not the first):
+```bash
+DISPLAY=:0 xprop | grep WM_CLASS
+# WM_CLASS(STRING) = "chromium", "Chromium"   <- use "Chromium"
+```
+
+Edit the existing `<applications>` section inside the full `rc.xml`:
+```xml
+<applications>
+  <application class="Chromium">
+    <decor>no</decor>
+    <maximized>yes</maximized>
+    <fullscreen>no</fullscreen>
+    <focus>yes</focus>
+  </application>
+</applications>
+```
+
+`<fullscreen>no</fullscreen>` is the important one — see the stacking-layer
+note below.
+
+Validate and apply without a full X restart:
+```bash
+xmllint --noout ~/.config/openbox/rc.xml && echo OK
+DISPLAY=:0 openbox --reconfigure
+```
+
+### Why not just use `chromium --kiosk`?
+
+Openbox has fixed stacking layers:
+```
+layer 2: normal windows
+layer 3: "above" / always-on-top windows   <- Onboard's "always on top" lives here
+layer 4: fullscreen windows                 <- chromium --kiosk lives here
+layer 5: Openbox's own internal menus
+```
+True EWMH fullscreen (`--kiosk`) always outranks "always on top," so Onboard
+gets stuck underneath it — no keyboard setting can override this. The fix is
+to avoid real fullscreen entirely: use `--app` mode (strips tabs/omnibox
+without setting the fullscreen WM state) combined with the Openbox rule above
+to strip decorations and maximize instead. End visual result is identical to
+kiosk mode, but Onboard can render on top of it.
+
+---
+
+## 4. Openbox autostart
+
+`~/.config/openbox/autostart`:
+```bash
+# Screen never blanks/sleeps
+xset s off
+xset s noblank
+xset -dpms
+
+# Hide mouse cursor when idle
+unclutter -idle 0.5 -root &
+
+# AT-SPI wiring for Onboard auto-show
+export GTK_MODULES=gail:atk-bridge
+export NO_AT_BRIDGE=0
+
+onboard &
+sleep 1
+
+# Get current screen resolution once, or hardcode if known
+# xrandr --current | grep '*'
+
+# Watchdog: relaunch Chromium if it ever closes/crashes
+while true; do
+  chromium \
+    --app="http://127.0.0.1:8080/webvisu.htm" \
+    --user-data-dir=/home/taywinkel/.config/chromium-kiosk \
+    --window-position=0,0 \
+    --window-size=1920,1080 \
+    --force-renderer-accessibility \
+    --noerrdialogs \
+    --disable-infobars \
+    --disable-session-crashed-bubble \
+    --disable-translate \
+    --no-first-run \
+    --password-store=basic \
+    --check-for-update-interval=31536000
+  sleep 2
+done
+```
+
+Notes:
+- `--app=URL` (note the `=`) — a missing `=` silently falls back to a normal
+  windowed Chromium with full tabs/menu.
+- `--user-data-dir` gives the kiosk its own Chromium profile, separate from
+  any profile used during manual testing. Without this, Chromium's
+  single-instance behavior can hand a new `--app` launch off to an existing
+  regular browser instance instead of opening fresh in app mode — same
+  symptom as forgetting `--app` entirely.
+- `--force-renderer-accessibility` forces Chromium to expose its accessibility
+  tree (needed for Onboard to see focus/caret events inside the actual page,
+  not just browser chrome).
+- `--window-position`/`--window-size` set explicitly to the real screen
+  resolution — CODESYS WebVisu renders at whatever resolution it sees on
+  first load, so this also fixes WebVisu not filling the screen.
+
+---
+
+## 5. Onboard settings (via `onboard-settings` GUI)
+
+- **General → Auto-show when editing text**: on. Depends on the AT-SPI
+  wiring in step 4.
+- **Window → Dock to screen edge**: on, but with **"Shrink work area"
+  unchecked**. This is the key discovery of this whole project: leaving
+  "shrink work area" checked makes Onboard send a `_NET_WM_STRUT` hint to
+  Openbox, which reserves screen space and squishes/resizes the maximized
+  Chromium window underneath it (which broke WebVisu's fixed-canvas
+  rendering). Unchecking it keeps Onboard visually docked but purely as an
+  overlay — nothing else resizes to make room for it.
+- **Window → Always on top**: on (belt-and-suspenders alongside the Openbox
+  rule; not strictly load-bearing once `--app` mode avoids real fullscreen).
+
+---
+
+## 6. CODESYS WebVisu scaling (project-side, not OS/browser)
+
+WebVisu by default renders at a fixed pixel canvas (whatever resolution the
+visualization was designed at) and does not stretch to fill the browser
+window — it just centers with dead space around it.
+
+Fix, in the CODESYS project:
+1. Under **Visualization Manager**, select the **WebVisu** object (not the
+   visualization itself).
+2. Open its properties → **Scaling Options**.
+3. Set scaling to **Isotropic**.
+4. If elements should reflow individually rather than scale as one block,
+   set their **Movement** properties (absolute/relative bound to
+   `Visu.Width`/`Visu.Height`).
+5. If the setting doesn't seem to take effect: do a **Clean** build
+   (Application → Clean) before Login/Download, not just a normal
+   re-download — this has tripped up others with the exact same symptom.
+
+---
+
+## 7. Known gotchas hit along the way (for future reference)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Onboard stuck under fullscreen Chromium | Openbox stacking layers: fullscreen always beats "always on top" | Avoid real fullscreen; use `--app` + Openbox decor/maximize rule |
+| Chromium shows full tabs/menu despite `--app` | Missing `=` in `--app=URL`, or single-instance handoff to an old profile | Fix the flag syntax; use a dedicated `--user-data-dir` |
+| Titlebar still visible after adding Openbox rule | `rc.xml` was only an `<applications>` fragment, not a full config | `cp /etc/xdg/openbox/rc.xml` and edit the real file |
+| Openbox rule silently not matching | `class` attribute case mismatch (used instance name, not class name) | Check `xprop \| grep WM_CLASS`, use the second quoted value |
+| Onboard docking squishes/resizes the browser window | "Shrink work area" checked, sending a WM strut hint | Uncheck "Shrink work area" in Onboard's docking settings |
+| WebVisu doesn't fill the screen even at full-screen browser | WebVisu's own fixed-canvas rendering, unrelated to WM/browser | Set WebVisu object's Scaling Options to Isotropic; clean-build if needed |
+
+---
+
+## Next steps (not yet done)
+
+- Script/auto-apply all Onboard settings (`gsettings`/`dconf`) rather than
+  clicking through the GUI on every fresh install.
+- Trim Onboard's layout down to QWERTY only — no settings/gear button, no
+  extra special-key rows.
+- Custom Onboard theme/styling.
+- Optional: lock down WM escape routes (Alt+Tab, Ctrl+Alt+T, VT switching)
+  if this is heading toward an unattended/public deployment.

@@ -1,0 +1,35 @@
+---
+slug: todays-post
+title: Today's Post
+authors: [taylor]
+tags: [greetings]
+---
+
+Why the top-left menu gives a 404
+
+Your top-left menu is controlled by docusaurus.config.js (or .ts). In the starter template, there's usually a hardcoded navbar link pointing to a specific doc or blog post.
+
+{/* truncate */}
+
+If the navbar item is trying to find blog/2021-02-28-greetings or a specific markdown file that you renamed, moved, or changed from .md to .mdx, the navbar link breaks and throws a 404.
+
+The Fix:
+
+    Open docusaurus.config.js (or .ts).
+
+    Search for the word greetings or look inside the themeConfig.navbar.items array.
+
+    Check what it's pointing to. It will look something like this:
+    JavaScript
+
+```javascript
+{
+  to: '/blog/greetings', // Check if this matches the "slug" in your front matter
+  label: 'Greetings',
+  position: 'left',
+}
+```
+
+    Ensure the to: field matches exactly the slug: greetings you set in your file's front matter. If it's pointing to an explicit file path like blog/2021-02-28-greetings.md, change it to match your new .mdx file or change it to a URL path (/blog/greetings).
+
+(Note: Don't forget to restart your server after saving docusaurus.config.js!)

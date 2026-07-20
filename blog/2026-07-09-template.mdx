@@ -1,0 +1,53 @@
+---
+slug: template
+title: Template
+authors: [taylor]
+tags: [docusaurus]
+---
+
+This post is a template for all sorts of features a all sorts of elements available for use in the website.
+
+The first element would be the '{/* truncate */}' element which will only show the text above the truncate while on the main blog page. Anything below will be hidden.
+
+{/* truncate */}
+
+The second element would be a set of code which is created using the triple single quotes 
+
+``` javascript title="docusaurus.config.js
+{
+  to: '/blog/greetings', // Check if this matches the "slug" in your front matter
+  label: 'Greetings',
+  position: 'left',
+}
+```
+
+The third element is the tip blocks/elements
+
+:::tip
+
+This is a tip box
+
+:::
+
+:::warning
+
+This is a warning box
+
+:::
+
+:::danger
+
+This is a danger box
+
+:::
+
+:::caution
+
+This is a caution box
+
+:::
+
+The fourth element is an interactive button
+
+<button onClick={() => alert('button clicked!')}>Click me!</button>
+
