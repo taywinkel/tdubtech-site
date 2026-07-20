@@ -46,32 +46,55 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          //routeBasePath: 'tutorials',
           sidebarPath: './sidebars.js',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/taywinkel/tdubtech-site',
+          editUrl: 'https://github.com/taywinkel/tdubtech-site',
         },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/taywinkel/tdubtech-site',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
+        // 1. Turned off default preset blog so it doesn't conflict with our custom multi-blog layout
+        blog: false, 
         theme: {
           customCss: './src/css/custom.css',
         },
       }),
+    ],
+  ],
+
+  // 2. Added the plugins array here to cleanly register both blog streams separately
+  plugins: [
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'blog',
+        routeBasePath: 'blog',
+        path: './blog',
+        showReadingTime: true,
+        feedOptions: {
+          type: ['rss', 'atom'],
+          xslt: true,
+        },
+        editUrl: 'https://github.com/taywinkel/tdubtech-site',
+        onInlineTags: 'warn',
+        onInlineAuthors: 'warn',
+        onUntruncatedBlogPosts: 'warn',
+      },
+    ],
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'reviews',
+        routeBasePath: 'reviews', // URL will be tdubtech.com/reviews
+        path: './reviews',        // Looks at the folder right in your root directory
+        blogTitle: 'Tech Reviews',
+        blogDescription: 'Hardware and tech reviews from TdubTech',
+        showReadingTime: true,
+        feedOptions: {
+          type: ['rss', 'atom'],
+          xslt: true,
+        },
+        editUrl: 'https://github.com/taywinkel/tdubtech-site',
+        onInlineTags: 'warn',
+        onInlineAuthors: 'warn',
+        onUntruncatedBlogPosts: 'warn',
+      },
     ],
   ],
 
@@ -97,12 +120,12 @@ const config = {
             label: 'Tutorials',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
+          {to: '/reviews', label: 'Reviews', position: 'left'},
           {
             href: 'https://github.com/taywinkel/tdubtech-site',
             label: 'GitHub',
             position: 'right',
           },
-          {to: '/reviews', label: 'Reviews', position: 'left'},
         ],
       },
       footer: {
