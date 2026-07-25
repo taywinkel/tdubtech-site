@@ -49,8 +49,17 @@ const config = {
           sidebarPath: './sidebars.js',
           editUrl: 'https://github.com/taywinkel/tdubtech-site',
         },
-        // 1. Turned off default preset blog so it doesn't conflict with our custom multi-blog layout
-        blog: false, 
+        // Re-enabled standard blog!
+        blog: {
+          path: 'blog',
+          showReadingTime: true,
+          blogTitle: 'Our Blog',
+          blogDescription: 'News and updates from TDubTech',
+          editUrl: 'https://github.com/taywinkel/tdubtech-site',
+          onInlineTags: 'warn',
+          onInlineAuthors: 'warn',
+          onUntruncatedBlogPosts: 'warn',
+        }, 
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -58,42 +67,15 @@ const config = {
     ],
   ],
 
-  // 2. Added the plugins array here to cleanly register both blog streams separately
+  // Second docs instance dedicated to Reviews
   plugins: [
     [
-      '@docusaurus/plugin-content-blog',
-      {
-        id: 'blog',
-        routeBasePath: 'blog',
-        path: './blog',
-        showReadingTime: true,
-        feedOptions: {
-          type: ['rss', 'atom'],
-          xslt: true,
-        },
-        editUrl: 'https://github.com/taywinkel/tdubtech-site',
-        onInlineTags: 'warn',
-        onInlineAuthors: 'warn',
-        onUntruncatedBlogPosts: 'warn',
-      },
-    ],
-    [
-      '@docusaurus/plugin-content-blog',
+      '@docusaurus/plugin-content-docs',
       {
         id: 'reviews',
-        routeBasePath: 'reviews', // URL will be tdubtech.com/reviews
-        path: './reviews',        // Looks at the folder right in your root directory
-        blogTitle: 'Tech Reviews',
-        blogDescription: 'Hardware and tech reviews from TdubTech',
-        showReadingTime: true,
-        feedOptions: {
-          type: ['rss', 'atom'],
-          xslt: true,
-        },
-        editUrl: 'https://github.com/taywinkel/tdubtech-site',
-        onInlineTags: 'warn',
-        onInlineAuthors: 'warn',
-        onUntruncatedBlogPosts: 'warn',
+        path: 'reviews',
+        routeBasePath: 'reviews',
+        sidebarPath: './sidebarsReviews.js',
       },
     ],
   ],
@@ -120,7 +102,13 @@ const config = {
             label: 'Tutorials',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
-          {to: '/reviews', label: 'Reviews', position: 'left'},
+          {
+            type: 'docSidebar',
+            docsPluginId: 'reviews',
+            sidebarId: 'reviewsSidebar',
+            position: 'left',
+            label: 'Reviews',
+          },
           {
             href: 'https://github.com/taywinkel/tdubtech-site',
             label: 'GitHub',
