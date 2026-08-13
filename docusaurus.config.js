@@ -11,7 +11,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'TDubTech',
-  tagline: 'Tutorials and projects from TdubTech',
+  tagline: 'Tech Projects, Tutorials, and Reviews.',
   favicon: 'img/drakeDuckClose.png',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -47,7 +47,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          editUrl: 'https://github.com/taywinkel/tdubtech-site',
+          // editUrl: 'https://github.com/taywinkel/tdubtech-site',
         },
         // Re-enabled standard blog!
         blog: {
@@ -55,7 +55,7 @@ const config = {
           showReadingTime: true,
           blogTitle: 'Our Blog',
           blogDescription: 'News and updates from TDubTech',
-          editUrl: 'https://github.com/taywinkel/tdubtech-site',
+          // editUrl: 'https://github.com/taywinkel/tdubtech-site',
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -110,7 +110,7 @@ const config = {
             label: 'Reviews',
           },
           {
-            href: 'https://github.com/taywinkel/tdubtech-site',
+            href: 'https://github.com/taywinkel',
             label: 'GitHub',
             position: 'right',
           },
@@ -154,7 +154,7 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/taywinkel/tdubtech-site',
+                href: 'https://github.com/taywinkel',
               },
             ],
           },

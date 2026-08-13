@@ -4,24 +4,33 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Tech related stuff I find useful',
-    image: require('@site/static/img/drakeDuck.png').default,
+    title: 'Tutorials & Guides',
+    image: require('@site/static/img/drakeDuckthumbsup.png').default,
     description: (
       <>
-        I am using this site as a repository of all the tech related stuff I find useful. 
-        This includes but is not limited to: <b>programming, web development, cloud computing, and more</b>.
+        Step-by-step walkthroughs for everything ranging from Industrial Automation to Web Development.
       </>
     ),
-  }
+  },
+  {
+    title: 'Tech Projects & Reviews',
+    image: require('@site/static/img/drakeDuckcomputer.png').default,
+    description: (
+      <>
+        Reviews of both the latest tech, and not so new tech. PLC's, microcontrollers, computers, and more!
+      </>
+    ),
+  },
 ];
 
 function Feature({image, title, description}) {
   return (
-    <div className={clsx('col col--6 col--offset-3')}>
+    // 'col--md-6' keeps them side-by-side on desktop/tablets, while 'col--12' stacks them on mobile
+    <div className={clsx('col col--6 col--md-12 padding-horiz--lg margin-bottom--xl')}>
       <div className="text--center">
         <img src={image} className={styles.featureSvg} alt={title} role="img" />
       </div>
-      <div className="text--center padding-horiz--md">
+      <div className="text--center margin-top--md">
         <Heading as="h3">{title}</Heading>
         <p>{description}</p>
       </div>
