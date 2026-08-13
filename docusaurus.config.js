@@ -156,6 +156,10 @@ const config = {
                 label: 'GitHub',
                 href: 'https://github.com/taywinkel',
               },
+              {
+                label: 'Who is Drake Duck?',
+                to: '/whoisdrakeduck',
+              }
             ],
           },
         ],
