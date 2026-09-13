@@ -12,36 +12,27 @@ This kiosk stack is by far the easiest to install and setup. There is nearly zer
 
 ### Advantages 
 
-**Simple Setup:** Basic installation in literally 11 steps. That is amazing.  
-
-**Lightweight:** Moderate on resources. There is no desktop environment installed with this one.  
-
-**Automated Session:** Login is automatically managed.
-
-**Solid Base:** Based on Debian  
-
-**Long-Term Support:** Service package is good for five years (from release date). You can get support for 15 years if you subscribe your Kiosk to Ubuntu Pro. 
+* **Simple Setup:** Basic installation in literally 11 command lines. That is pretty sweet.  
+* **Lightweight:** Moderate on resources. There is no desktop environment installed with this one.  
+* **Automated Session:** Login is automatically managed.
+* **Solid Base:** Based on Debian  
+* **Long-Term Support:** Service package is good for five years (from release date). You can get support for a total of 15 years if you subscribe your Kiosk to Ubuntu Pro. 
 
 ### Disadvantages 
 
-**Snap Dependent:** Utilizes Snaps. This may be an issue depending on who you speak with. 
-
-**Customization Limited:** Less customizability than other kiosk environments
-
-**Real-Time Kernel Restricted:** Real-time Linux kernel only available behind a paywall (if you require this that is) 
+* **Snap Dependent:** Utilizes Snaps. This may be an issue depending on who you speak with. 
+* **Customization Limited:** Less customizability than other kiosk environments
+* **Real-Time Kernel Restricted:** Real-time Linux kernel only available behind a paywall (if you require this that is) 
 
 
 # Web Kiosk Setup Example
 
 This Web Kiosk uses the following stack:
 
-**OS:** Ubuntu Server 26.04.1 LTS
-
-**Compositor:** ubuntu-frame
-
-**OSK:** ubuntu-frame-osk
-
-**Browser:** Chromium
+* **OS:** Ubuntu Server 26.04.1 LTS
+* **Compositor:** `ubuntu-frame`
+* **OSK:** `ubuntu-frame-osk`
+* **Browser:** `chromium`
 
 ### 1. Install Ubuntu Server Minimized
 The first step is to install Ubuntu Server on your machine. Select the **Minimized** version so as to reduce bloat installed on the system overall.
@@ -70,22 +61,22 @@ sudo snap install chromium
 ```
 ### 5. Connect Services to Each Other and Set The URL
 
-Set up ubuntu-frame to start automatically at startup
+Set up `ubuntu-frame` to start automatically at startup
 ```bash
 sudo snap set ubuntu-frame daemon=true 
 ```
 
-Connect ubuntu-frame-osk to the ubuntu-frame wayland socket
+Connect `ubuntu-frame-osk` to the `ubuntu-frame` wayland socket
 ```bash
 sudo snap connect ubuntu-frame-osk:wayland 
 ```
 
-Set up ubuntu-frame-osk to start automatically at startup
+Set up `ubuntu-frame-osk` to start automatically at startup
 ```bash
 sudo snap set ubuntu-frame-osk daemon=true 
 ```
 
-Set the target webpage for the chromium application
+Set the target webpage for the `chromium` application
 ```bash
 sudo snap set chromium url=https://google.com 
 ```
@@ -95,11 +86,11 @@ Hide the mouse/cursor (you can skip this option if you're not setting up a touch
 sudo snap set ubuntu-frame config="cursor=null" 
 ```
 
-Connect the Chromium Wayland interface to Ubuntu-Frame
+Connect the `chromium` Wayland interface to Ubuntu-Frame
 ```bash
 sudo snap connect chromium:wayland 
 ```
-Configure Chromium to start automatically at startup
+Configure `chromium` to start automatically at startup
 ```bash
 sudo snap set chromium daemon=true
 ```
